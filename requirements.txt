@@ -1,0 +1,8 @@
+pytorch-lightning
+sentence_transformers
+torch~=1.11.0
+wget~=3.2
+nltk~=3.7
+numpy~=1.22.0
+pandas~=1.4.2
+faiss-cpu
