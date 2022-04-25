@@ -1,5 +1,6 @@
 from typing import Optional
-
+from torch.utils.data import Dataset
+from sklearn.model_selection import train_test_split
 import pytorch_lightning as pl
 from torch.utils.data import DataLoader
 import tarfile
@@ -18,11 +19,12 @@ ssl._create_default_https_context = ssl._create_unverified_context
 nltk.download('punkt')
 
 
-class MNISTDataModule(pl.LightningDataModule):
-    def __init__(self, data_dir: str = "./../data", dataset: str = "2020-03-13"):
+class CORDDataModule(pl.LightningDataModule):
+    def __init__(self, data_dir: str = "./../data", dataset: str = "2020-03-13", ask_for_recompute=False):
         super().__init__()
         self.data_dir = data_dir
         self.dataset = dataset
+        self.ask_for_recompute = ask_for_recompute
 
     def prepare_data(self) -> None:
         self.download_data()
@@ -31,6 +33,11 @@ class MNISTDataModule(pl.LightningDataModule):
 
     def setup(self, stage: Optional[str] = None) -> None:
         self.data = self.preprocess_data()
+        train, test = train_test_split(self.data, test_size=0.1)
+        train, val = train_test_split(self.data, test_size=0.2)
+        self.train = train
+        self.val = val
+        self.test = test
 
     def download_data(self):
         if path.exists(path.join(self.data_dir, f"cord-19_{self.dataset}.tar.gz")):
@@ -60,7 +67,7 @@ class MNISTDataModule(pl.LightningDataModule):
     def preprocess_data(self):
         if path.exists(path.join(self.data_dir, self.dataset + "/preprocessed.csv")):
             print("Data already preprocessed, reading file.")
-            data = pd.read_csv(path.join(self.data_dir, self.dataset + "/preprocessed.csv"))
+            data = pd.read_csv(path.join(self.data_dir, self.dataset + "/preprocessed.csv"), index_col=0)
         else:
             print("Preprocessing data...")
             data = pd.read_csv(path.join(self.data_dir, f'{self.dataset}/all_sources_metadata_{self.dataset}.csv'))
@@ -82,7 +89,8 @@ class MNISTDataModule(pl.LightningDataModule):
             # data = data.merge(text_df, left_on='sha', right_on='paper_id')
 
             print("Tokenizing data...")
-            data = data.dropna(subset=["abstract"])
+            data = data.dropna(subset=["abstract", "sha"])
+            data = data.drop_duplicates(subset=["sha"])
             data['abstract'] = data['abstract'].apply(lambda x: x.replace('<jats:p>', ''))
             data['abstract_tokens'] = [nltk.word_tokenize(text) for text in data['abstract']]
             data = data[['sha', 'title', 'abstract', 'abstract_tokens']]
@@ -95,6 +103,16 @@ class MNISTDataModule(pl.LightningDataModule):
             # Save preprocessed file
             data.to_csv(path.join(self.data_dir, f"{self.dataset}/preprocessed.csv"))
 
+        if path.exists(path.join(self.data_dir, self.dataset + "/cord.index")):
+            if self.ask_for_recompute:
+                print("Already computed embeddings. Type 'y' if you want to recompute: ")
+                recompute = input()
+                if recompute != 'y':
+                    return data
+            else:
+                print("Already computed embeddings.")
+                return data
+
         print("Computing embeddings...")
         model = SentenceTransformer('msmarco-distilbert-base-dot-prod-v3')
 
@@ -106,18 +124,28 @@ class MNISTDataModule(pl.LightningDataModule):
         return data
 
     def train_dataloader(self):
-        return None
+        return DataLoader(CORDDataset(self.train))
 
     def val_dataloader(self):
-        return None
+        return DataLoader(CORDDataset(self.val))
 
     def test_dataloader(self):
-        return None
+        return DataLoader(CORDDataset(self.test))
 
-    def predict_dataloader(self):
-        return None
+
+class CORDDataset(Dataset):
+    """ CORD dataset."""
+
+    def __init__(self, df):
+        self.data = df.to_dict('records')
+
+    def __len__(self):
+        return len(self.data)
+
+    def __getitem__(self, idx):
+        return self.data[idx]
 
 
 if __name__ == "__main__":
-    dataModule = MNISTDataModule()
-    dataModule.prepare_data()
+    data_module = CORDDataModule()
+    data_module.prepare_data()
