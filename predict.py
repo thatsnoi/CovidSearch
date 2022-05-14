@@ -5,11 +5,12 @@ import faiss
 
 from sentence_transformers import SentenceTransformer
 
-model = SentenceTransformer('msmarco-distilbert-base-dot-prod-v3')
+#model = SentenceTransformer('msmarco-distilbert-base-dot-prod-v3')
+model = SentenceTransformer('./models/bi-encoders/bi-encoder-v1')
 
 df = pd.read_csv("./data/2020-03-13/preprocessed.csv", index_col=0)
 
-index = faiss.read_index('./data/2020-03-13/cord.index')
+index = faiss.read_index('./dataloaders/cord.index')
 
 
 def fetch_paper_info(dataframe_idx):

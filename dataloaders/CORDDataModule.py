@@ -32,9 +32,9 @@ class CORDDataModule(pl.LightningDataModule):
         self.preprocess_data()
 
     def setup(self, stage: Optional[str] = None) -> None:
-        self.data = self.preprocess_data()
-        train, test = train_test_split(self.data, test_size=0.1)
-        train, val = train_test_split(self.data, test_size=0.2)
+        data = self.preprocess_data()
+        train, test = train_test_split(data, test_size=0.1)
+        train, val = train_test_split(data, test_size=0.2)
         self.train = train
         self.val = val
         self.test = test
@@ -114,7 +114,7 @@ class CORDDataModule(pl.LightningDataModule):
                 return data
 
         print("Computing embeddings...")
-        model = SentenceTransformer('msmarco-distilbert-base-dot-prod-v3')
+        model = SentenceTransformer('../models/bi-encoders/bi-encoder-v1')
 
         encoded_data = model.encode(data.abstract_tokens.tolist()[0:1000])
         index = faiss.IndexIDMap(faiss.IndexFlatIP(768))

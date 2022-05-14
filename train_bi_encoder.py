@@ -9,6 +9,7 @@ def train_bi_encoder():
     train_dataloader = data_module.train_dataloader()
 
     # Now we create a SentenceTransformer model from scratch
+    # TODO: try another model
     word_emb = models.Transformer('sentence-transformers/msmarco-distilbert-base-dot-prod-v3')
     pooling = models.Pooling(word_emb.get_word_embedding_dimension())
     model = SentenceTransformer(modules=[word_emb, pooling])
