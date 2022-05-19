@@ -1,6 +1,8 @@
 
 data/
 
+datasets/
+
 venv/
 
 .DS_Store
