@@ -9,3 +9,4 @@ faiss-cpu
 tqdm
 transformers
 beir
+tensorflow_text
