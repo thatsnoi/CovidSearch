@@ -29,13 +29,13 @@ data_path = util.download_and_unzip(url, out_dir)
 #### Provide the data_path where scifact has been downloaded and unzipped
 corpus, queries, qrels = GenericDataLoader(data_folder=data_path).load(split="test")
 
-random.seed(55)
-corpus = dict(random.sample(corpus.items(), 1000))
+#random.seed(55)
+#corpus = dict(random.sample(corpus.items(), 1000))
 
 #### Load the SBERT model and retrieve using cosine-similarity
 #model = DRES(models.SentenceBERT("msmarco-distilbert-base-v3"), batch_size=16)
 
-model = DRES(models.SentenceBERT('./models/bi-encoders/bi-encoder-v1'), batch_size=16)
+model = DRES(models.SentenceBERT('./output/bert-base-uncased-GenQ-nfcorpus'), batch_size=16)
 
 retriever = EvaluateRetrieval(model, score_function="dot") # or "dot" for dot-product
 results = retriever.retrieve(corpus, queries)
@@ -44,7 +44,7 @@ results = retriever.retrieve(corpus, queries)
 cross_encoder_model = CrossEncoder('cross-encoder/ms-marco-electra-base')
 reranker = Rerank(cross_encoder_model, batch_size=128)
 
-# Rerank top-100 results retrieved by BM25
+# Rerank top-100 results retrieved by bi encoder model
 rerank_results = reranker.rerank(corpus, queries, results, top_k=10)
 
 
