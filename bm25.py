@@ -1,8 +1,7 @@
 """
 After docker installation, please follow the steps below to get docker container up and running:
 1. docker pull beir/pyserini-fastapi 
-2. docker build -t pyserini-fastapi .
-3. docker run -p 8000:8000 -it --rm pyserini-fastapi
+2. docker run -p 8000:8000 -it --rm beir/pyserini-fastapi
 Once the docker container is up and running in local, now run the code below.
 This code doesn't require GPU to run.
 Usage: python evaluate_anserini_bm25.py
