@@ -7,6 +7,7 @@ from sentence_transformers import SentenceTransformer, losses, models
 
 import pathlib, os
 import logging
+import random
 
 #### Just some code to print debug information to stdout
 logging.basicConfig(format='%(asctime)s - %(message)s',
@@ -25,6 +26,8 @@ data_path = util.download_and_unzip(url, out_dir)
 #### Provide the data_path where nfcorpus has been downloaded and unzipped
 corpus = GenericDataLoader(data_path).load_corpus()
 
+random.seed(55)
+corpus = dict(random.sample(corpus.items(), 1000))
 
 ##############################
 #### 1. Query-Generation  ####
