@@ -47,7 +47,7 @@ prefix = "gen"
 ques_per_passage = 3
 
 #### Generate queries per passage from docs in corpus and save them in data_path
-generator.generate(corpus, output_dir=data_path, ques_per_passage=ques_per_passage, prefix=prefix)
+# generator.generate(corpus, output_dir=data_path, ques_per_passage=ques_per_passage, prefix=prefix)
 
 ################################
 #### 2. Train Dense-Encoder ####
@@ -88,7 +88,7 @@ model_save_path = os.path.join(pathlib.Path(__file__).parent.absolute(), "output
 os.makedirs(model_save_path, exist_ok=True)
 
 #### Configure Train params
-num_epochs = 1
+num_epochs = 10
 evaluation_steps = 5000
 warmup_steps = int(len(train_samples) * num_epochs / retriever.batch_size * 0.1)
 
