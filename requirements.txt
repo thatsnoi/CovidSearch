@@ -1,11 +1,11 @@
 pytorch-lightning
 sentence_transformers
-torch~=1.11.0
-wget~=3.2
-nltk~=3.7
+torch
+wget
+nltk
 numpy
-pandas~=1.4.2
+pandas
 faiss-cpu
-tqdm~=4.64.0
-transformers~=4.18.0
+tqdm
+transformers
 beir
