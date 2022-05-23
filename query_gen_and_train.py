@@ -26,8 +26,8 @@ data_path = util.download_and_unzip(url, out_dir)
 #### Provide the data_path where nfcorpus has been downloaded and unzipped
 corpus = GenericDataLoader(data_path).load_corpus()
 
-# random.seed(55)
-# corpus = dict(random.sample(corpus.items(), 1000))
+random.seed(55)
+corpus = dict(random.sample(corpus.items(), 1000))
 
 ##############################
 #### 1. Query-Generation  ####
@@ -44,10 +44,10 @@ prefix = "gen"
 
 #### Generating 3 questions per passage.
 #### Reminder the higher value might produce lots of duplicates
-ques_per_passage = 3
+ques_per_passage = 5
 
 #### Generate queries per passage from docs in corpus and save them in data_path
-# generator.generate(corpus, output_dir=data_path, ques_per_passage=ques_per_passage, prefix=prefix)
+generator.generate(corpus, output_dir=data_path, ques_per_passage=ques_per_passage, prefix=prefix)
 
 ################################
 #### 2. Train Dense-Encoder ####
@@ -60,7 +60,7 @@ corpus, gen_queries, gen_qrels = GenericDataLoader(data_path, prefix=prefix).loa
 #dev_corpus, dev_queries, dev_qrels = GenericDataLoader(data_path).load(split="dev")
 
 #### Provide any HuggingFace model and fine-tune from scratch
-model_name = "distilbert-base-uncased"
+model_name = "dmis-lab/biobert-v1.1"
 word_embedding_model = models.Transformer(model_name, max_seq_length=350)
 pooling_model = models.Pooling(word_embedding_model.get_word_embedding_dimension())
 model = SentenceTransformer(modules=[word_embedding_model, pooling_model])
