@@ -37,23 +37,11 @@ else:
 
 model_save_path = train_bi_encoder(data_path, num_epochs=args.num_epochs, model_name=args.pretrained_model)
 
-ndcg, _map, _map, precision = test(dataloader, model_save_path, args.sample_size)
+ndcg, _map, recall, precision = test(dataloader, model_save_path, args.sample_size)
 
-print(ndcg)
-
-run["eval"] = {
-    "ndcg@1": ndcg[0],
-    "ndcg@5": ndcg[1],
-    "ndcg@10": ndcg[2],
-    "map@1": _map[0],
-    "map@5": _map[1],
-    "map@10": _map[2],
-    "recall@1": _map[0],
-    "recall@5": _map[1],
-    "recall@10": _map[2],
-    "precision@1": precision[0],
-    "precision@5": precision[1],
-    "precision@10": precision[2],
-}
+run["eval/ndcg"] = ndcg
+run["eval/map"] = _map
+run["eval/recall"] = recall
+run["eval/precision"] = precision
 
 run.stop()
