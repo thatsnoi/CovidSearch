@@ -36,12 +36,12 @@ if args.gen:
 else:
     print("Skipped generating queries")
 
-run["dataset/gen/gen_queries.jsonl"].track_files(path.join(data_path, "gen-queries.jsonl"))
-run["dataset/gen/train.tsv"].track_files(path.join(data_path, "gen-qrels/train.tsv"))
+run["dataset/gen/gen_queries.jsonl"].upload(path.join(data_path, "gen-queries.jsonl"))
+run["dataset/gen/train.tsv"].upload(path.join(data_path, "gen-qrels/train.tsv"))
 
 model_save_path = train_bi_encoder(data_path, num_epochs=args.num_epochs, model_name=args.pretrained_model)
 
-run["model/bi-encoder"].track_files(model_save_path)
+run["model/bi-encoder"].upload_files(model_save_path)
 
 ndcg, _map, recall, precision = test(dataloader, model_save_path, args.sample_size)
 
