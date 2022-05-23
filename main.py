@@ -5,11 +5,12 @@ from test import test
 import neptune.new as neptune
 
 parser = argparse.ArgumentParser(description='Parameters for TREC-Covid IR.')
+parser.add_argument('--name',               type=str, help='Experiment name for logging')
 parser.add_argument('--sample_size',        type=int, default=None, help='Corpus sample size')
 parser.add_argument('--gen',                type=bool, default=True, help='Generate queries')
 parser.add_argument('--pretrained_model',   type=str, default='dmis-lab/biobert-v1.1',
                     help='Pretrained huggingface model for bi-encoder training.')
-parser.add_argument('--num_epochs',             type=int, default=10, help='Epochs for bi-encoder training.')
+parser.add_argument('--num_epochs',         type=int, default=10, help='Epochs for bi-encoder training.')
 
 
 args = parser.parse_args()
@@ -27,11 +28,18 @@ params = {
     "num_epochs": args.num_epochs
     }
 run["parameters"] = params
+run["sys/name"] = args.name
 
-gen_queries(dataloader, data_path, sample_size=args.sample_size)
+if args.gen:
+    gen_queries(dataloader, data_path, sample_size=args.sample_size)
+else:
+    print("Skipped generating queries")
+
 model_save_path = train_bi_encoder(data_path, num_epochs=args.num_epochs, model_name=args.pretrained_model)
 
 ndcg, _map, _map, precision = test(dataloader, model_save_path, args.sample_size)
+
+print(ndcg)
 
 run["eval"] = {
     "ndcg@1": ndcg[0],
