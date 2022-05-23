@@ -70,7 +70,7 @@ model = SentenceTransformer(modules=[word_embedding_model, pooling_model])
 
 #### Provide any sentence-transformers model path
 model_path = "bert-base-uncased" # or "msmarco-distilbert-base-v3"
-retriever = TrainRetriever(model=model, batch_size=64)
+retriever = TrainRetriever(model=model, batch_size=32)
 
 #### Prepare training samples
 train_samples = retriever.load_train(corpus, gen_queries, gen_qrels)
