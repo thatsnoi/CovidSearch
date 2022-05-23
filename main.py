@@ -3,6 +3,7 @@ from utils import download_dataset
 from query_gen_and_train import gen_queries, train_bi_encoder
 from test import test
 import neptune.new as neptune
+from os import path
 
 parser = argparse.ArgumentParser(description='Parameters for TREC-Covid IR.')
 parser.add_argument('--name',               type=str, help='Experiment name for logging')
@@ -35,8 +36,8 @@ if args.gen:
 else:
     print("Skipped generating queries")
 
-run["dataset/gen/gen_queries.jsonl"].track_files("./datasets/trec-covid/gen_queries.jsonl")
-run["dataset/gen/train.tsv"].track_files("./datasets/trec-covid/gen_qrels/train.tsv")
+run["dataset/gen/gen_queries.jsonl"].track_files(path.join(data_path, "gen_queries.jsonl"))
+run["dataset/gen/train.tsv"].track_files(path.join(data_path, "gen_qrels/train.tsv"))
 
 model_save_path = train_bi_encoder(data_path, num_epochs=args.num_epochs, model_name=args.pretrained_model)
 
