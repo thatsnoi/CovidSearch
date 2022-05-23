@@ -35,7 +35,12 @@ if args.gen:
 else:
     print("Skipped generating queries")
 
+run["dataset/gen/gen_queries.jsonl"].track_files("./datasets/trec-covid/gen_queries.jsonl")
+run["dataset/gen/train.tsv"].track_files("./datasets/trec-covid/gen_qrels/train.tsv")
+
 model_save_path = train_bi_encoder(data_path, num_epochs=args.num_epochs, model_name=args.pretrained_model)
+
+run["model/bi-encoder"].track_files(model_save_path)
 
 ndcg, _map, recall, precision = test(dataloader, model_save_path, args.sample_size)
 
