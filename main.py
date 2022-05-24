@@ -8,7 +8,6 @@ from os import path
 parser = argparse.ArgumentParser(description='Parameters for TREC-Covid IR.')
 parser.add_argument('--name',               type=str, help='Experiment name for logging')
 parser.add_argument('--sample_size',        type=int, default=None, help='Corpus sample size')
-parser.add_argument('--gen',                type=bool, default=True, help='Generate queries')
 parser.add_argument('--pretrained_model',   type=str, default='dmis-lab/biobert-v1.1',
                     help='Pretrained huggingface model for bi-encoder training.')
 parser.add_argument('--num_epochs',         type=int, default=10, help='Epochs for bi-encoder training.')
