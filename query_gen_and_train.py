@@ -52,7 +52,7 @@ def train_bi_encoder(data_path, model_name="dmis-lab/biobert-v1.1", model_path="
     # Prepare training samples
     train_samples = retriever.load_train(corpus, gen_queries, gen_qrels)
     if subset_size is not None:
-        random.sample(train_samples, math.floor(subset_size * len(train_samples)))
+        train_samples = random.sample(train_samples, math.floor(subset_size * len(train_samples)))
     train_dataloader = retriever.prepare_train(train_samples, shuffle=True)
     train_loss = losses.MultipleNegativesRankingLoss(model=retriever.model)
 
