@@ -12,7 +12,9 @@ parser.add_argument('--gen',                type=bool, default=True, help='Gener
 parser.add_argument('--pretrained_model',   type=str, default='dmis-lab/biobert-v1.1',
                     help='Pretrained huggingface model for bi-encoder training.')
 parser.add_argument('--num_epochs',         type=int, default=10, help='Epochs for bi-encoder training.')
-
+parser.add_argument('--gen', action='store_true')
+parser.add_argument('--no-gen', dest='gen', action='store_false')
+parser.set_defaults(gen=True)
 
 args = parser.parse_args()
 

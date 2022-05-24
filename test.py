@@ -20,7 +20,7 @@ def test(dataloader, model_path, sample_size, score_function="dot"):
 
     model = DRES(models.SentenceBERT(model_path), batch_size=16)
 
-    retriever = EvaluateRetrieval(model, score_function=score_function)  # or "cosine-similarity"
+    retriever = EvaluateRetrieval(model, score_function=score_function)  # or "cos_sim"
     results = retriever.retrieve(corpus, queries)
 
     cross_encoder_model = CrossEncoder('cross-encoder/ms-marco-electra-base')
