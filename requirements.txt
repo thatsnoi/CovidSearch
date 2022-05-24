@@ -10,4 +10,3 @@ tqdm
 transformers
 beir
 tensorflow_text
-neptune-client
