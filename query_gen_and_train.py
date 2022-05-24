@@ -2,6 +2,7 @@ import logging
 import os
 import pathlib
 import random
+import math
 
 from beir.datasets.data_loader import GenericDataLoader
 from beir.generation import QueryGenerator as QGen
@@ -14,12 +15,12 @@ logging.basicConfig(format='%(asctime)s - %(message)s',
                     datefmt='%Y-%m-%d %H:%M:%S',
                     level=logging.INFO)
 
+random.seed(55)
 
 def gen_queries(dataloader, data_path, sample_size=None, model_path="BeIR/query-gen-msmarco-t5-base-v1", ques_per_passage=5):
     corpus = dataloader.load_corpus()
 
     if sample_size is not None:
-        random.seed(55)
         corpus = dict(random.sample(corpus.items(), sample_size))
 
     # question-generation model loading
@@ -32,7 +33,7 @@ def gen_queries(dataloader, data_path, sample_size=None, model_path="BeIR/query-
     generator.generate(corpus, output_dir=data_path, ques_per_passage=ques_per_passage, prefix="gen")
 
 
-def train_bi_encoder(data_path, model_name="dmis-lab/biobert-v1.1", model_path="biobert", num_epochs=10):
+def train_bi_encoder(data_path, model_name="dmis-lab/biobert-v1.1", model_path="biobert", num_epochs=10, subset_size=0.1):
     # Training on Generated Queries
     corpus, gen_queries, gen_qrels = GenericDataLoader(data_path, prefix="gen").load(split="train")
 
@@ -50,6 +51,8 @@ def train_bi_encoder(data_path, model_name="dmis-lab/biobert-v1.1", model_path="
 
     # Prepare training samples
     train_samples = retriever.load_train(corpus, gen_queries, gen_qrels)
+    if subset_size is not None:
+        random.sample(train_samples, math.floor(subset_size * len(train_samples)))
     train_dataloader = retriever.prepare_train(train_samples, shuffle=True)
     train_loss = losses.MultipleNegativesRankingLoss(model=retriever.model)
 
