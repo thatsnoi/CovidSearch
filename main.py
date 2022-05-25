@@ -11,10 +11,8 @@ parser.add_argument('--sample_size',        type=int, default=None, help='Corpus
 parser.add_argument('--pretrained_model',   type=str, default='dmis-lab/biobert-v1.1',
                     help='Pretrained huggingface model for bi-encoder training.')
 parser.add_argument('--num_epochs',         type=int, default=10, help='Epochs for bi-encoder training.')
-parser.add_argument('--gen', action='store_true')
-parser.add_argument('--no-gen', dest='gen', action='store_false')
+parser.add_argument('--gen', type=str, default=None, help='Generated query files from neptune')
 parser.add_argument('--bi_encoder', type=str, default=None, help='Bi-Encoder from neptune')
-parser.set_defaults(gen=True)
 
 args = parser.parse_args()
 
@@ -33,17 +31,28 @@ params = {
 run["parameters"] = params
 run["sys/name"] = args.name
 
-if args.gen:
-    gen_queries(dataloader, data_path, sample_size=args.sample_size)
-else:
-    print("Skipped generating queries")
-
-run["dataset/gen/gen_queries.jsonl"].upload(path.join(data_path, "gen-queries.jsonl"))
-run["dataset/gen/train.tsv"].upload(path.join(data_path, "gen-qrels/train.tsv"))
 
 if args.bi_encoder:
+
+    if args.gen is None:
+        gen_queries(dataloader, data_path, sample_size=args.sample_size)
+    else:
+        print(f"Downloading generated queries from neptune project {args.gen}")
+        project = neptune.init(
+            project="noahjadallah/TREC-Covid",
+            api_token="eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiJlNzgwNzhlNy1iMDVlLTQwNWUtYWJlYS04NWMxNjA0YmQ3ODAifQ==",
+            run=args.bi_encoder
+        )
+        project["dataset/gen/gen_queries.jsonl"].download(path.join(data_path, "gen-queries.jsonl"))
+        project["dataset/gen/train.tsv"].download(path.join(data_path, "gen-qrels/train.tsv"))
+
+    run["dataset/gen/gen_queries.jsonl"].upload(path.join(data_path, "gen-queries.jsonl"))
+    run["dataset/gen/train.tsv"].upload(path.join(data_path, "gen-qrels/train.tsv"))
+
     model_save_path = train_bi_encoder(data_path, num_epochs=args.num_epochs, model_name=args.pretrained_model)
+
 else:
+    print(f"Downloading bi-encoder from neptune project {args.gen}")
     project = neptune.init(
         project="noahjadallah/TREC-Covid",
         api_token="eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiJlNzgwNzhlNy1iMDVlLTQwNWUtYWJlYS04NWMxNjA0YmQ3ODAifQ==",
