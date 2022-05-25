@@ -6,7 +6,7 @@ from beir.reranking import Rerank
 import random
 import logging
 from utils import load_queries_query, load_queries_narrative
-from beir.datasets.data_loader import GenericDataLoader
+import types
 
 logging.basicConfig(format='%(asctime)s - %(message)s',
                     datefmt='%Y-%m-%d %H:%M:%S',
@@ -20,12 +20,12 @@ def test(dataloader, model_path, sample_size, score_function="dot"):
 
     # Using "query" query
     dataloader.queries = {}
-    dataloader._load_queries = load_queries_query
+    dataloader._load_queries = types.MethodType(load_queries_query, dataloader)
     _, queries_query, _ = dataloader.load(split="test")
 
     # Using "narrative" query
     dataloader.queries = {}
-    dataloader._load_queries = load_queries_narrative
+    dataloader._load_queries = types.MethodType(load_queries_narrative, dataloader)
     _, queries_narrative, _ = dataloader.load(split="test")
 
 
