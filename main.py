@@ -32,7 +32,7 @@ run["parameters"] = params
 run["sys/name"] = args.name
 
 
-if args.bi_encoder:
+if args.bi_encoder is None:
 
     if args.gen is None:
         gen_queries(dataloader, data_path, sample_size=args.sample_size)
