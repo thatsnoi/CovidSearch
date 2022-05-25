@@ -1,6 +1,6 @@
 import os
 import pathlib
-
+import json
 from beir import util
 from beir.datasets.data_loader import GenericDataLoader
 
@@ -16,3 +16,24 @@ def download_dataset():
     dataloader = GenericDataLoader(data_folder=data_path)
 
     return dataloader, data_path
+
+
+def load_queries_query(self):
+    with open(self.query_file, encoding='utf8') as fIn:
+        for line in fIn:
+            line = json.loads(line)
+            self.queries[line.get("_id")] = line.get("metadata").get("query")
+
+
+def load_queries_narrative(self):
+    with open(self.query_file, encoding='utf8') as fIn:
+        for line in fIn:
+            line = json.loads(line)
+            self.queries[line.get("_id")] = line.get("metadata").get("narrative")
+
+
+def load_queries(self):
+    with open(self.query_file, encoding='utf8') as fIn:
+        for line in fIn:
+            line = json.loads(line)
+            self.queries[line.get("_id")] = line.get("text")

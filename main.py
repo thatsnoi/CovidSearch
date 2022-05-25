@@ -43,10 +43,12 @@ if args.bi_encoder is None:
         project = neptune.init(
             project="noahjadallah/TREC-Covid",
             api_token="eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiJlNzgwNzhlNy1iMDVlLTQwNWUtYWJlYS04NWMxNjA0YmQ3ODAifQ==",
-            run=args.bi_encoder
+            run=args.bi_encoder,
+            mode="read-only"
         )
         project["dataset/gen/gen_queries.jsonl"].download(path.join(data_path, "gen-queries.jsonl"))
         project["dataset/gen/train.tsv"].download(path.join(data_path, "gen-qrels/train.tsv"))
+        project.stop()
 
     run["dataset/gen/gen_queries.jsonl"].upload(path.join(data_path, "gen-queries.jsonl"))
     run["dataset/gen/train.tsv"].upload(path.join(data_path, "gen-qrels/train.tsv"))
@@ -58,9 +60,11 @@ else:
     project = neptune.init(
         project="noahjadallah/TREC-Covid",
         api_token="eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiJlNzgwNzhlNy1iMDVlLTQwNWUtYWJlYS04NWMxNjA0YmQ3ODAifQ==",
-        run=args.bi_encoder
+        run=args.bi_encoder,
+        mode="read-only"
     )
     project["model/bi-encoder"].download()
+    project.stop()
 
     with ZipFile('bi-encoder.zip', 'r') as zipObj:
         zipObj.extractall()
