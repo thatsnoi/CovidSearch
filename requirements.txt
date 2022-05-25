@@ -9,5 +9,5 @@ faiss-cpu
 tqdm
 transformers
 beir
-tensorflow_text=2.8.2
+tensorflow_text==2.8.2
 neptune-client
