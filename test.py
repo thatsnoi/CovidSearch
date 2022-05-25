@@ -29,7 +29,7 @@ def test(dataloader, model_path, sample_size, score_function="dot"):
     # Rerank top-100 results retrieved by bi encoder model
     rerank_results = reranker.rerank(corpus, queries, results, top_k=10)
 
-    # Evaluate your model with NDCG@k, MAP@K, Recall@K and Precision@K  where k = [1,5,10]
-    ndcg, _map, recall, precision = retriever.evaluate(qrels, rerank_results, [1, 5, 10])
+    # Evaluate your model with NDCG@k, MAP@K, Recall@K and Precision@K  where k = [1,5,10,20]
+    ndcg, _map, recall, precision = retriever.evaluate(qrels, rerank_results, [1, 5, 10, 20])
 
     return ndcg, _map, recall, precision

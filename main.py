@@ -54,7 +54,7 @@ if args.bi_encoder is None:
     model_save_path = train_bi_encoder(data_path, num_epochs=args.num_epochs, model_name=args.pretrained_model)
 
 else:
-    print(f"Downloading bi-encoder from neptune project {args.gen}")
+    print(f"Downloading bi-encoder from neptune project {args.bi_encoder}")
     project = neptune.init(
         project="noahjadallah/TREC-Covid",
         api_token="eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiJlNzgwNzhlNy1iMDVlLTQwNWUtYWJlYS04NWMxNjA0YmQ3ODAifQ==",
@@ -68,14 +68,13 @@ else:
     model_save_path = args.bi_encoder_path
 
 
+run["model/bi-encoder"].upload_files(model_save_path)
 
-# run["model/bi-encoder"].upload_files(model_save_path)
-#
-# ndcg, _map, recall, precision = test(dataloader, model_save_path, args.sample_size)
-#
-# run["eval/ndcg"] = ndcg
-# run["eval/map"] = _map
-# run["eval/recall"] = recall
-# run["eval/precision"] = precision
+ndcg, _map, recall, precision = test(dataloader, model_save_path, args.sample_size)
+
+run["eval/ndcg"] = ndcg
+run["eval/map"] = _map
+run["eval/recall"] = recall
+run["eval/precision"] = precision
 
 run.stop()
