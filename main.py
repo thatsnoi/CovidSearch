@@ -4,6 +4,7 @@ from query_gen_and_train import gen_queries, train_bi_encoder
 from test import test
 import neptune.new as neptune
 from os import path
+from zipfile import ZipFile
 
 parser = argparse.ArgumentParser(description='Parameters for TREC-Covid IR.')
 parser.add_argument('--name',               type=str, help='Experiment name for logging')
@@ -13,6 +14,7 @@ parser.add_argument('--pretrained_model',   type=str, default='dmis-lab/biobert-
 parser.add_argument('--num_epochs',         type=int, default=10, help='Epochs for bi-encoder training.')
 parser.add_argument('--gen', type=str, default=None, help='Generated query files from neptune')
 parser.add_argument('--bi_encoder', type=str, default=None, help='Bi-Encoder from neptune')
+parser.add_argument('--bi_encoder_path', type=str, default='./output/biobert-GenQ-bi-encoder')
 
 args = parser.parse_args()
 
@@ -59,6 +61,12 @@ else:
         run=args.bi_encoder
     )
     project["model/bi-encoder"].download()
+
+    with ZipFile('bi-encoder.zip', 'r') as zipObj:
+        zipObj.extractall()
+
+    model_save_path = args.bi_encoder_path
+
 
 
 # run["model/bi-encoder"].upload_files(model_save_path)
