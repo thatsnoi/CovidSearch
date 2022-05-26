@@ -6,6 +6,7 @@ from beir.reranking import Rerank
 import random
 import logging
 from bm25 import bm25
+import json
 from utils import load_queries_query, load_queries_narrative
 import types
 
@@ -41,8 +42,8 @@ def test(dataloader, model_path, sample_size, score_function="dot"):
     retriever.evaluate(qrels, results_text, [1, 5, 10, 20])
 
     print('Results with BM25')
-    results_bm25 = bm25(dataloader, sample_size=sample_size)
-    retriever.evaluate(qrels, results_bm25, [1, 5, 10, 20])
+    with open('results/results_bm25.json') as json_file:
+        results_bm25 = json.load(json_file)
 
     # print('Results for "query" query')
     # results_query = retriever.retrieve(corpus, queries_query)

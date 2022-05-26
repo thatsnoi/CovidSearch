@@ -10,11 +10,13 @@ Usage: python evaluate_anserini_bm25.py
 from beir import util, LoggingHandler
 from beir.datasets.data_loader import GenericDataLoader
 from beir.retrieval.evaluation import EvaluateRetrieval
+from utils import download_dataset
 
 import pathlib, os, json
 import logging
 import requests
 import random
+from os import path
 
 #### Just some code to print debug information to stdout
 logging.basicConfig(format='%(asctime)s - %(message)s',
@@ -22,7 +24,7 @@ logging.basicConfig(format='%(asctime)s - %(message)s',
                     level=logging.INFO)
 
 
-def bm25(dataloader, sample_size, data_path="./datasets/trec-covid"):
+def bm25(dataloader, sample_size=None, data_path="./datasets/trec-covid"):
     corpus, queries, qrels = dataloader.load(split="test")
 
     if sample_size is not None:
@@ -48,7 +50,7 @@ def bm25(dataloader, sample_size, data_path="./datasets/trec-covid"):
 
     # Index documents to Pyserini #####
     index_name = "beir/trec-covid"  # beir/scifact
-    r = requests.get(docker_beir_pyserini + "/index/", params={"index_name": index_name})
+    # r = requests.get(docker_beir_pyserini + "/index/", params={"index_name": index_name})
     print("Finished indexing")
 
     # Retrieve documents from Pyserini #####
@@ -60,4 +62,14 @@ def bm25(dataloader, sample_size, data_path="./datasets/trec-covid"):
     # Retrieve pyserini results (format of results is identical to qrels)
     results = json.loads(requests.post(docker_beir_pyserini + "/lexical/batch_search/", json=payload).text)["results"]
 
+    logging.info("Retriever evaluation for k in: {}".format([1, 3, 5, 10]))
+    ndcg, _map, recall, precision = retriever.evaluate(qrels, results, [1, 3, 5, 10])
+
+    with open(path.join(data_path, 'results_bm25.json'), 'w') as outfile:
+        json.dump(results, outfile)
+
     return results
+
+if __name__ == '__main__':
+    dataloader, data_path = download_dataset()
+    bm25(dataloader)
