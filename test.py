@@ -13,7 +13,6 @@ logging.basicConfig(format='%(asctime)s - %(message)s',
                     level=logging.INFO)
 
 
-
 def test(dataloader, model_path, sample_size, score_function="dot"):
     # Using "text" query
     corpus, queries_text, qrels = dataloader.load(split="test")
@@ -27,7 +26,6 @@ def test(dataloader, model_path, sample_size, score_function="dot"):
     dataloader.queries = {}
     dataloader._load_queries = types.MethodType(load_queries_narrative, dataloader)
     _, queries_narrative, _ = dataloader.load(split="test")
-
 
     if sample_size is not None:
         random.seed(55)
@@ -53,10 +51,47 @@ def test(dataloader, model_path, sample_size, score_function="dot"):
     cross_encoder_model = CrossEncoder('cross-encoder/ms-marco-electra-base')
     reranker = Rerank(cross_encoder_model, batch_size=128)
 
+    # Fuse rankings
+    fused_rankings = rrf([results_text, results_query, results_narrative])
+
     # Rerank top-100 results retrieved by bi encoder model
-    rerank_results = reranker.rerank(corpus, queries_text, results_text, top_k=100)
+    rerank_results = reranker.rerank(corpus, queries_text, fused_rankings, top_k=20)
 
     # Evaluate your model with NDCG@k, MAP@K, Recall@K and Precision@K  where k = [1,5,10,20]
     ndcg, _map, recall, precision = retriever.evaluate(qrels, rerank_results, [1, 5, 10, 20])
 
     return ndcg, _map, recall, precision
+
+import copy
+
+
+# {'1': {'oq2jgo6z': -19.72185707092285, 'npflq69s': -20.42959213256836, 'lrf75ze3': 27.448469161987305, 'cy4eo4vu': -11.664365768432617}}
+def rrf(all_rankings, k=0):
+    for rankings_per_topic in all_rankings:
+        for topic in rankings_per_topic:
+            sorted_rankings = sorted(rankings_per_topic[topic].items(), key=lambda x: -x[1])
+            sorted_rankings = [(x[0], idx + 1) for idx, x in enumerate(sorted_rankings)]
+            rankings_per_topic[topic] = dict(sorted_rankings)
+
+    fused_rankings = copy.deepcopy(all_rankings)[0]
+    for topic in fused_rankings:
+        for doc in fused_rankings[topic]:
+            fused_rankings[topic][doc] = 0
+
+    for index, rankings_per_topic in enumerate(all_rankings):
+        for topic in rankings_per_topic:
+            for doc in rankings_per_topic[topic]:
+                fused_rankings[topic][doc] = fused_rankings[topic][doc] + (
+                            1 / (k + rankings_per_topic[topic][doc]))
+
+    return fused_rankings
+
+
+if __name__ == '__main__':
+    example = [{'1': {'d5': 2.34, 'd4': 2.12, 'd3': 1.93,
+                      'd2': 1.43, 'd1': 1.34}}, {
+                   '1': {'d5': 1.23, 'd4': 1.02, 'd3': 1.00,
+                         'd1': 0.85, 'd2': 0.71}}, {
+                   '1': {'d4': 19685, 'd1': 18756, 'd2': 2342,
+                         'd5': 2341, 'd3': 123}}]
+    rrf(example)
