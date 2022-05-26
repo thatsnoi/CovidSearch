@@ -66,7 +66,7 @@ import copy
 
 
 # {'1': {'oq2jgo6z': -19.72185707092285, 'npflq69s': -20.42959213256836, 'lrf75ze3': 27.448469161987305, 'cy4eo4vu': -11.664365768432617}}
-def rrf(all_rankings, k=0):
+def rrf(all_rankings, k=60):
     for rankings_per_topic in all_rankings:
         for topic in rankings_per_topic:
             sorted_rankings = sorted(rankings_per_topic[topic].items(), key=lambda x: -x[1])
