@@ -52,7 +52,9 @@ def test(dataloader, model_path, sample_size, score_function="dot"):
     reranker = Rerank(cross_encoder_model, batch_size=128)
 
     # Fuse rankings
+    print("Fusing rankings...")
     fused_rankings = rrf([results_text, results_query, results_narrative])
+    retriever.evaluate(qrels, fused_rankings, [1, 5, 10, 20])
 
     # Rerank top-100 results retrieved by bi encoder model
     rerank_results = reranker.rerank(corpus, queries_text, fused_rankings, top_k=20)
