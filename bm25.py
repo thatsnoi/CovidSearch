@@ -21,58 +21,43 @@ logging.basicConfig(format='%(asctime)s - %(message)s',
                     datefmt='%Y-%m-%d %H:%M:%S',
                     level=logging.INFO)
 
-#### /print debug information to stdout
 
-#### Download scifact.zip dataset and unzip the dataset
-dataset = "trec-covid"
-url = "https://public.ukp.informatik.tu-darmstadt.de/thakur/BEIR/datasets/{}.zip".format(dataset)
-out_dir = os.path.join(pathlib.Path(__file__).parent.absolute(), "datasets")
-data_path = util.download_and_unzip(url, out_dir)
-corpus, queries, qrels = GenericDataLoader(data_path).load(split="test")
+def bm25(dataloader, sample_size, data_path="./datasets/trec-covid"):
+    corpus, queries, qrels = dataloader.load(split="test")
 
-#### Convert BEIR corpus to Pyserini Format #####
-pyserini_jsonl = "pyserini.jsonl"
-with open(os.path.join(data_path, pyserini_jsonl), 'w', encoding="utf-8") as fOut:
-    for doc_id in corpus:
-        title, text = corpus[doc_id].get("title", ""), corpus[doc_id].get("text", "")
-        data = {"id": doc_id, "title": title, "contents": text}
-        json.dump(data, fOut)
-        fOut.write('\n')
+    if sample_size is not None:
+        random.seed(55)
+        corpus = dict(random.sample(corpus.items(), sample_size))
 
-#### Download Docker Image beir/pyserini-fastapi ####
-#### Locally run the docker Image + FastAPI ####
-docker_beir_pyserini = "http://127.0.0.1:8000"
+    # Convert BEIR corpus to Pyserini Format #####
+    pyserini_jsonl = "pyserini.jsonl"
+    with open(os.path.join(data_path, pyserini_jsonl), 'w', encoding="utf-8") as fOut:
+        for doc_id in corpus:
+            title, text = corpus[doc_id].get("title", ""), corpus[doc_id].get("text", "")
+            data = {"id": doc_id, "title": title, "contents": text}
+            json.dump(data, fOut)
+            fOut.write('\n')
 
-#### Upload Multipart-encoded files ####
-with open(os.path.join(data_path, "pyserini.jsonl"), "rb") as fIn:
-    r = requests.post(docker_beir_pyserini + "/upload/", files={"file": fIn}, verify=False)
+    # Download Docker Image beir/pyserini-fastapi
+    # Locally run the docker Image + FastAPI ####
+    docker_beir_pyserini = "http://127.0.0.1:8000"
 
-#### Index documents to Pyserini #####
-index_name = "beir/trec-covid" # beir/scifact
-r = requests.get(docker_beir_pyserini + "/index/", params={"index_name": index_name})
-print("Finished indexing")
+    # Upload Multipart-encoded files
+    with open(os.path.join(data_path, "pyserini.jsonl"), "rb") as fIn:
+        r = requests.post(docker_beir_pyserini + "/upload/", files={"file": fIn}, verify=False)
 
-#### Retrieve documents from Pyserini #####
-retriever = EvaluateRetrieval()
-qids = list(queries)
-query_texts = [queries[qid] for qid in qids]
-payload = {"queries": query_texts, "qids": qids, "k": max(retriever.k_values)}
+    # Index documents to Pyserini #####
+    index_name = "beir/trec-covid"  # beir/scifact
+    r = requests.get(docker_beir_pyserini + "/index/", params={"index_name": index_name})
+    print("Finished indexing")
 
-#### Retrieve pyserini results (format of results is identical to qrels)
-results = json.loads(requests.post(docker_beir_pyserini + "/lexical/batch_search/", json=payload).text)["results"]
+    # Retrieve documents from Pyserini #####
+    retriever = EvaluateRetrieval()
+    qids = list(queries)
+    query_texts = [queries[qid] for qid in qids]
+    payload = {"queries": query_texts, "qids": qids, "k": max(retriever.k_values)}
 
-#### Retrieve RM3 expanded pyserini results (format of results is identical to qrels)
-# results = json.loads(requests.post(docker_beir_pyserini + "/lexical/rm3/batch_search/", json=payload).text)["results"]
+    # Retrieve pyserini results (format of results is identical to qrels)
+    results = json.loads(requests.post(docker_beir_pyserini + "/lexical/batch_search/", json=payload).text)["results"]
 
-#### Evaluate your retrieval using NDCG@k, MAP@K ...
-logging.info("Retriever evaluation for k in: {}".format([1, 3, 5, 10]))
-ndcg, _map, recall, precision = retriever.evaluate(qrels, results, [1, 3, 5, 10])
-
-#### Retrieval Example ####
-# query_id, scores_dict = random.choice(list(results.items()))
-# logging.info("Query : %s\n" % queries[query_id])
-#
-# scores = sorted(scores_dict.items(), key=lambda item: item[1], reverse=True)
-# for rank in range(10):
-#     doc_id = scores[rank][0]
-#     logging.info("Doc %d: %s [%s] - %s\n" % (rank+1, doc_id, corpus[doc_id].get("title"), corpus[doc_id].get("text")))
+    return results
