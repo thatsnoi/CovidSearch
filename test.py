@@ -5,7 +5,6 @@ from beir.reranking.models import CrossEncoder
 from beir.reranking import Rerank
 import random
 import logging
-from bm25 import bm25
 import json
 from utils import load_queries_query, load_queries_narrative
 import types
@@ -72,8 +71,6 @@ def test(dataloader, model_path, sample_size, score_function="dot"):
 
     return ndcg, _map, recall, precision
 
-import copy
-
 
 # {'1': {'oq2jgo6z': -19.72185707092285, 'npflq69s': -20.42959213256836, 'lrf75ze3': 27.448469161987305, 'cy4eo4vu': -11.664365768432617}}
 def rrf(all_rankings, k=60):
@@ -83,14 +80,15 @@ def rrf(all_rankings, k=60):
             sorted_rankings = [(x[0], idx + 1) for idx, x in enumerate(sorted_rankings)]
             rankings_per_topic[topic] = dict(sorted_rankings)
 
-    fused_rankings = copy.deepcopy(all_rankings)[0]
-    for topic in fused_rankings:
-        for doc in fused_rankings[topic]:
-            fused_rankings[topic][doc] = 0
+    fused_rankings = {}
 
     for index, rankings_per_topic in enumerate(all_rankings):
         for topic in rankings_per_topic:
+            if topic not in fused_rankings:
+                fused_rankings[topic] = {}
             for doc in rankings_per_topic[topic]:
+                if doc not in fused_rankings[topic]:
+                    fused_rankings[topic][doc] = 0
                 fused_rankings[topic][doc] = fused_rankings[topic][doc] + (
                             1 / (k + rankings_per_topic[topic][doc]))
 
@@ -103,5 +101,5 @@ if __name__ == '__main__':
                    '1': {'d5': 1.23, 'd4': 1.02, 'd3': 1.00,
                          'd1': 0.85, 'd2': 0.71}}, {
                    '1': {'d4': 19685, 'd1': 18756, 'd2': 2342,
-                         'd5': 2341, 'd3': 123}}]
-    rrf(example)
+                         'd5': 2341, 'd3': 123, 'd6': 100}}]
+    print(rrf(example))
