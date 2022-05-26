@@ -37,13 +37,16 @@ def test(dataloader, model_path, sample_size, score_function="dot"):
 
     retriever = EvaluateRetrieval(model, score_function=score_function)  # or "cos_sim"
 
+    print('Results with BM25')
+    with open('results/results_bm25.json') as json_file:
+        results_bm25 = json.load(json_file)
+    retriever.evaluate(qrels, results_bm25, [1, 5, 10, 20])
+
     print('Results for "text" query')
     results_text = retriever.retrieve(corpus, queries_text)
     retriever.evaluate(qrels, results_text, [1, 5, 10, 20])
 
-    print('Results with BM25')
-    with open('results/results_bm25.json') as json_file:
-        results_bm25 = json.load(json_file)
+
 
     # print('Results for "query" query')
     # results_query = retriever.retrieve(corpus, queries_query)
