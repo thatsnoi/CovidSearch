@@ -40,6 +40,7 @@ def test(dataloader, model_path, sample_size, score_function="dot"):
     print('Results for "text" query')
     results_text = retriever.retrieve(corpus, queries_text)
     retriever.evaluate(qrels, results_text, [1, 5, 10, 20])
+    print(results_text)
 
     print('Results for "query" query')
     results_query = retriever.retrieve(corpus, queries_query)
