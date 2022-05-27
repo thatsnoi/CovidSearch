@@ -76,8 +76,8 @@ if args.bi_encoder_neptune_id is None:
             mode="read-only"
         )
         project["dataset/gen/gen_queries.jsonl"].download(path.join(data_path, "gen-queries.jsonl"))
-        if not path.exists('gen-qrels'):
-            makedirs('gen-qrels')
+        if not path.exists('./datasets/trec-covid/gen-qrels'):
+            makedirs('./datasets/trec-covid/gen-qrels')
         project["dataset/gen/train.tsv"].download(path.join(data_path, "gen-qrels/train.tsv"))
         project.stop()
 
