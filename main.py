@@ -32,6 +32,7 @@ parser.add_argument('--score_function', type=str, default='dot')
 # Cross encoder
 parser.add_argument('--cross_encoder', action='store_true')
 parser.set_defaults(cross_encoder=False)
+parser.add_argument('--cross_encoder_top_k', type=int, default=20)
 
 # Fuse with BM25
 parser.add_argument('--fuse_with_bm25', action='store_true')
@@ -53,7 +54,9 @@ params = {
     "num_epochs": args.num_epochs,
     "score_function": args.score_function,
     "fuse_with_bm25": args.fuse_with_bm25,
-    "questions_subset": args.questions_subset
+    "questions_subset": args.questions_subset,
+    "cross_encoder": args.cross_encoder,
+    "cross_encoder_top_k": args.cross_encoder_top_k
     }
 
 run["parameters"] = params
@@ -101,7 +104,8 @@ else:
 
 run["model/bi-encoder"].upload_files(model_save_path)
 
-ndcg, _map, recall, precision = test(dataloader, model_save_path, args.sample_size)
+ndcg, _map, recall, precision = test(dataloader, model_save_path, args.sample_size, score_function=args.score_function,
+                                     fuse_with_bm25=args.fuse_with_bm25, cross_encoder_top_k=args.cross_encoder_top_k)
 
 run["eval/ndcg"] = ndcg
 run["eval/map"] = _map
