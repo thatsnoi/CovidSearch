@@ -13,7 +13,7 @@ parser.add_argument('--name', type=str, help='Name of the experiment')
 parser.add_argument('--sample_size', type=int, default=None, help='Corpus sample size')
 
 # Bi-encoder fine-tuning
-parser.add_argument('--pretrained_model', type=str, default='dmis-lab/biobert-v1.1',
+parser.add_argument('--pretrained_model', type=str, default=None,
                     help='Pretrained huggingface model for bi-encoder training.')
 parser.add_argument('--num_epochs', type=int, default=10, help='Epochs for bi-encoder training.')
 parser.add_argument('--model_name', type=str)
