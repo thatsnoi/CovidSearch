@@ -63,7 +63,7 @@ run["parameters"] = params
 run["sys/name"] = args.name
 
 
-if args.bi_encoder is None:
+if args.bi_encoder_neptune_id is None:
 
     if args.gen is None:
         gen_queries(dataloader, data_path, sample_size=args.sample_size)
@@ -72,7 +72,7 @@ if args.bi_encoder is None:
         project = neptune.init(
             project="noahjadallah/TREC-Covid",
             api_token="eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiJlNzgwNzhlNy1iMDVlLTQwNWUtYWJlYS04NWMxNjA0YmQ3ODAifQ==",
-            run=args.bi_encoder,
+            run=args.bi_encoder_neptune_id,
             mode="read-only"
         )
         project["dataset/gen/gen_queries.jsonl"].download(path.join(data_path, "gen-queries.jsonl"))
