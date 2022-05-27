@@ -20,7 +20,7 @@ parser.add_argument('--model_name', type=str)
 parser.add_argument('--questions_subset', type=float, default=0.1)
 
 # Use pre-generated queries
-parser.add_argument('--gen', type=str, default=None, help='Generated query files from neptune')
+parser.add_argument('--gen_neptune_id', type=str, default=None, help='Generated query files from neptune')
 
 # Use pre-fine-tuned bi-encoder
 parser.add_argument('--bi_encoder_neptune_id', type=str, default=None, help='Neptune experiment id for bi-encoder')
@@ -65,14 +65,14 @@ run["sys/name"] = args.name
 
 if args.bi_encoder_neptune_id is None:
 
-    if args.gen is None:
+    if args.gen_neptune_id is None:
         gen_queries(dataloader, data_path, sample_size=args.sample_size)
     else:
-        print(f"Downloading generated queries from neptune project {args.gen}")
+        print(f"Downloading generated queries from neptune project {args.gen_neptune_id}")
         project = neptune.init(
             project="noahjadallah/TREC-Covid",
             api_token="eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiJlNzgwNzhlNy1iMDVlLTQwNWUtYWJlYS04NWMxNjA0YmQ3ODAifQ==",
-            run=args.bi_encoder_neptune_id,
+            run=args.gen_neptune_id,
             mode="read-only"
         )
         project["dataset/gen/gen_queries.jsonl"].download(path.join(data_path, "gen-queries.jsonl"))
@@ -86,11 +86,11 @@ if args.bi_encoder_neptune_id is None:
                                        model_name=args.model_name, subset_size=args.questions_subset)
 
 else:
-    print(f"Downloading bi-encoder from neptune project {args.bi_encoder}")
+    print(f"Downloading bi-encoder from neptune project {args.bi_encoder_neptune_id}")
     project = neptune.init(
         project="noahjadallah/TREC-Covid",
         api_token="eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiJlNzgwNzhlNy1iMDVlLTQwNWUtYWJlYS04NWMxNjA0YmQ3ODAifQ==",
-        run=args.bi_encoder,
+        run=args.bi_encoder_neptune_id,
         mode="read-only"
     )
     project["model/bi-encoder"].download()
