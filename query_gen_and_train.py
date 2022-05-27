@@ -61,7 +61,7 @@ def train_bi_encoder(data_path, pretained_model="dmis-lab/biobert-v1.1", model_n
 
     # Provide model save path
     model_save_path = os.path.join(pathlib.Path(__file__).parent.absolute(), "output",
-                                   "{}-GenQ-bi-encoder".format(model_name))
+                                   model_name)
     os.makedirs(model_save_path, exist_ok=True)
 
     # Configure Train params
