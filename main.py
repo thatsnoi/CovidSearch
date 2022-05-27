@@ -3,7 +3,7 @@ from utils import download_dataset
 from query_gen_and_train import gen_queries, train_bi_encoder
 from test import test
 import neptune.new as neptune
-from os import path
+from os import path, makedirs
 from zipfile import ZipFile
 
 parser = argparse.ArgumentParser(description='Parameters for TREC-Covid IR.')
@@ -76,6 +76,8 @@ if args.bi_encoder_neptune_id is None:
             mode="read-only"
         )
         project["dataset/gen/gen_queries.jsonl"].download(path.join(data_path, "gen-queries.jsonl"))
+        if not path.exists('gen-qrels'):
+            makedirs('gen-qrels')
         project["dataset/gen/train.tsv"].download(path.join(data_path, "gen-qrels/train.tsv"))
         project.stop()
 
