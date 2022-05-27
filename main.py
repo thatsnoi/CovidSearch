@@ -107,7 +107,8 @@ else:
 run["model/bi-encoder"].upload_files(model_save_path)
 
 ndcg, _map, recall, precision = test(dataloader, model_save_path, args.sample_size, score_function=args.score_function,
-                                     fuse_with_bm25=args.fuse_with_bm25, cross_encoder_top_k=args.cross_encoder_top_k)
+                                     fuse_with_bm25=args.fuse_with_bm25, cross_encoder=args.cross_encoder,
+                                     cross_encoder_top_k=args.cross_encoder_top_k)
 
 run["eval/ndcg"] = ndcg
 run["eval/map"] = _map
