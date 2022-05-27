@@ -25,18 +25,14 @@ def test(dataloader, model_path, sample_size, score_function="dot", cross_encode
 
     retriever = EvaluateRetrieval(model, score_function=score_function)  # or "cos_sim"
 
-    print('Results with BM25')
-    with open('results/results_bm25.json') as json_file:
-        results_bm25 = json.load(json_file)
-    retriever.evaluate(qrels, results_bm25, [1, 5, 10, 20])
-
     print('Results for "text" query')
     results = retriever.retrieve(corpus, queries_text)
-    retriever.evaluate(qrels, results, [1, 5, 10, 20])
 
     # Fuse rankings
     if fuse_with_bm25:
         print("Fusing rankings...")
+        with open('results/results_bm25.json') as json_file:
+            results_bm25 = json.load(json_file)
         results = rrf([results, results_bm25])
         retriever.evaluate(qrels, results, [1, 5, 10, 20])
 
