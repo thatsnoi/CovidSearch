@@ -7,14 +7,35 @@ from os import path
 from zipfile import ZipFile
 
 parser = argparse.ArgumentParser(description='Parameters for TREC-Covid IR.')
-parser.add_argument('--name',               type=str, help='Experiment name for logging')
-parser.add_argument('--sample_size',        type=int, default=None, help='Corpus sample size')
-parser.add_argument('--pretrained_model',   type=str, default='dmis-lab/biobert-v1.1',
+parser.add_argument('--name', type=str, help='Name of the experiment')
+
+# Only use subset (for testing)
+parser.add_argument('--sample_size', type=int, default=None, help='Corpus sample size')
+
+# Bi-encoder fine-tuning
+parser.add_argument('--pretrained_model', type=str, default='dmis-lab/biobert-v1.1',
                     help='Pretrained huggingface model for bi-encoder training.')
-parser.add_argument('--num_epochs',         type=int, default=10, help='Epochs for bi-encoder training.')
+parser.add_argument('--num_epochs', type=int, default=10, help='Epochs for bi-encoder training.')
+parser.add_argument('--model_name', type=str)
+parser.add_argument('--questions_subset', type=float, default=0.1)
+
+# Use pre-generated queries
 parser.add_argument('--gen', type=str, default=None, help='Generated query files from neptune')
-parser.add_argument('--bi_encoder', type=str, default=None, help='Bi-Encoder from neptune')
+
+# Use pre-fine-tuned bi-encoder
+parser.add_argument('--bi_encoder_neptune_id', type=str, default=None, help='Neptune experiment id for bi-encoder')
 parser.add_argument('--bi_encoder_path', type=str, default='./output/biobert-GenQ-bi-encoder')
+
+# Score Function
+parser.add_argument('--score_function', type=str, default='dot')
+
+# Cross encoder
+parser.add_argument('--cross_encoder', action='store_true')
+parser.set_defaults(cross_encoder=False)
+
+# Fuse with BM25
+parser.add_argument('--fuse_with_bm25', action='store_true')
+parser.set_defaults(fuse_with_bm25=False)
 
 args = parser.parse_args()
 
@@ -27,9 +48,14 @@ run = neptune.init(
 
 params = {
     "pretrained_model": args.pretrained_model,
+    "bi-encoder_model": args.model_name,
     "sample_size": args.sample_size,
-    "num_epochs": args.num_epochs
+    "num_epochs": args.num_epochs,
+    "score_function": args.score_function,
+    "fuse_with_bm25": args.fuse_with_bm25,
+    "questions_subset": args.questions_subset
     }
+
 run["parameters"] = params
 run["sys/name"] = args.name
 
@@ -53,7 +79,8 @@ if args.bi_encoder is None:
     run["dataset/gen/gen_queries.jsonl"].upload(path.join(data_path, "gen-queries.jsonl"))
     run["dataset/gen/train.tsv"].upload(path.join(data_path, "gen-qrels/train.tsv"))
 
-    model_save_path = train_bi_encoder(data_path, num_epochs=args.num_epochs, model_name=args.pretrained_model)
+    model_save_path = train_bi_encoder(data_path, num_epochs=args.num_epochs, pretained_model=args.pretrained_model,
+                                       model_name=args.model_name, subset_size=args.questions_subset)
 
 else:
     print(f"Downloading bi-encoder from neptune project {args.bi_encoder}")

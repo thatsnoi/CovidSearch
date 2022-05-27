@@ -33,13 +33,13 @@ def gen_queries(dataloader, data_path, sample_size=None, model_path="BeIR/query-
     generator.generate(corpus, output_dir=data_path, ques_per_passage=ques_per_passage, prefix="gen")
 
 
-def train_bi_encoder(data_path, model_name="dmis-lab/biobert-v1.1", model_path="biobert", num_epochs=10, subset_size=0.1):
+def train_bi_encoder(data_path, pretained_model="dmis-lab/biobert-v1.1", model_name="biobert", num_epochs=10, subset_size=0.1):
     # Training on Generated Queries
     corpus, gen_queries, gen_qrels = GenericDataLoader(data_path, prefix="gen").load(split="train")
 
     # Provide any HuggingFace model and fine-tune from scratch
-    if model_name is not None:
-        word_embedding_model = models.Transformer(model_name, max_seq_length=350)
+    if pretained_model is not None:
+        word_embedding_model = models.Transformer(pretained_model, max_seq_length=350)
         pooling_model = models.Pooling(word_embedding_model.get_word_embedding_dimension())
         model = SentenceTransformer(modules=[word_embedding_model, pooling_model])
     else:
@@ -61,7 +61,7 @@ def train_bi_encoder(data_path, model_name="dmis-lab/biobert-v1.1", model_path="
 
     # Provide model save path
     model_save_path = os.path.join(pathlib.Path(__file__).parent.absolute(), "output",
-                                   "{}-GenQ-bi-encoder".format(model_path))
+                                   "{}-GenQ-bi-encoder".format(model_name))
     os.makedirs(model_save_path, exist_ok=True)
 
     # Configure Train params

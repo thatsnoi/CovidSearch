@@ -6,27 +6,16 @@ from beir.reranking import Rerank
 import random
 import logging
 import json
-from utils import load_queries_query, load_queries_narrative
-import types
 
 logging.basicConfig(format='%(asctime)s - %(message)s',
                     datefmt='%Y-%m-%d %H:%M:%S',
                     level=logging.INFO)
 
 
-def test(dataloader, model_path, sample_size, score_function="dot"):
+def test(dataloader, model_path, sample_size, score_function="dot", cross_encoder=True,
+         fuse_with_bm25=True, cross_encoder_top_k=20):
     # Using "text" query
     corpus, queries_text, qrels = dataloader.load(split="test")
-
-    # # Using "query" query
-    # dataloader.queries = {}
-    # dataloader._load_queries = types.MethodType(load_queries_query, dataloader)
-    # _, queries_query, _ = dataloader.load(split="test")
-    #
-    # # Using "narrative" query
-    # dataloader.queries = {}
-    # dataloader._load_queries = types.MethodType(load_queries_narrative, dataloader)
-    # _, queries_narrative, _ = dataloader.load(split="test")
 
     if sample_size is not None:
         random.seed(55)
@@ -42,37 +31,28 @@ def test(dataloader, model_path, sample_size, score_function="dot"):
     retriever.evaluate(qrels, results_bm25, [1, 5, 10, 20])
 
     print('Results for "text" query')
-    results_text = retriever.retrieve(corpus, queries_text)
-    retriever.evaluate(qrels, results_text, [1, 5, 10, 20])
-
-
-
-    # print('Results for "query" query')
-    # results_query = retriever.retrieve(corpus, queries_query)
-    # retriever.evaluate(qrels, results_query, [1, 5, 10, 20])
-    #
-    # print('Results for "narrative" query')
-    # results_narrative = retriever.retrieve(corpus, queries_narrative)
-    # retriever.evaluate(qrels, results_narrative, [1, 5, 10, 20])
-
-    cross_encoder_model = CrossEncoder('cross-encoder/ms-marco-electra-base')
-    reranker = Rerank(cross_encoder_model, batch_size=128)
+    results = retriever.retrieve(corpus, queries_text)
+    retriever.evaluate(qrels, results, [1, 5, 10, 20])
 
     # Fuse rankings
-    print("Fusing rankings...")
-    fused_rankings = rrf([results_text, results_bm25])
-    retriever.evaluate(qrels, fused_rankings, [1, 5, 10, 20])
+    if fuse_with_bm25:
+        print("Fusing rankings...")
+        results = rrf([results, results_bm25])
+        retriever.evaluate(qrels, results, [1, 5, 10, 20])
 
-    # Rerank top-100 results retrieved by bi encoder model
-    rerank_results = reranker.rerank(corpus, queries_text, fused_rankings, top_k=20)
+    if cross_encoder:
+        cross_encoder_model = CrossEncoder('cross-encoder/ms-marco-electra-base')
+        reranker = Rerank(cross_encoder_model, batch_size=128)
+
+        # Rerank top-100 results retrieved by bi encoder model
+        results = reranker.rerank(corpus, queries_text, results, top_k=cross_encoder_top_k)
 
     # Evaluate your model with NDCG@k, MAP@K, Recall@K and Precision@K  where k = [1,5,10,20]
-    ndcg, _map, recall, precision = retriever.evaluate(qrels, rerank_results, [1, 5, 10, 20])
+    ndcg, _map, recall, precision = retriever.evaluate(qrels, results, [1, 5, 10, 20])
 
     return ndcg, _map, recall, precision
 
 
-# {'1': {'oq2jgo6z': -19.72185707092285, 'npflq69s': -20.42959213256836, 'lrf75ze3': 27.448469161987305, 'cy4eo4vu': -11.664365768432617}}
 def rrf(all_rankings, k=60):
     for rankings_per_topic in all_rankings:
         for topic in rankings_per_topic:
@@ -94,12 +74,3 @@ def rrf(all_rankings, k=60):
 
     return fused_rankings
 
-
-if __name__ == '__main__':
-    example = [{'1': {'d5': 2.34, 'd4': 2.12, 'd3': 1.93,
-                      'd2': 1.43, 'd1': 1.34}}, {
-                   '1': {'d5': 1.23, 'd4': 1.02, 'd3': 1.00,
-                         'd1': 0.85, 'd2': 0.71}}, {
-                   '1': {'d4': 19685, 'd1': 18756, 'd2': 2342,
-                         'd5': 2341, 'd3': 123, 'd6': 100}}]
-    print(rrf(example))
