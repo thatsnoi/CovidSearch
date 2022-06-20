@@ -7,7 +7,7 @@ import neptune.new as neptune
 from zipfile import ZipFile
 
 
-def index(neptune_id):
+def index(neptune_id="TREC-66", model_path="./output/biobert-GenQ-bi-encoder-GenQ-bi-encoder"):
     dataloader, data_path = download_dataset()
 
     print(f"Downloading bi-encoder from neptune project {neptune_id}")
@@ -22,8 +22,6 @@ def index(neptune_id):
 
     with ZipFile('bi-encoder.zip', 'r') as zipObj:
         zipObj.extractall()
-
-    model_path = "./output/bi-encoder"
 
     corpus, queries_text, qrels = dataloader.load(split="test")
     model = models.SentenceBERT(model_path)
