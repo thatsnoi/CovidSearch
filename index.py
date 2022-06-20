@@ -2,8 +2,30 @@ from beir.retrieval import models
 from beir.retrieval.search.dense import FlatIPFaissSearch
 import os
 
+from utils import download_dataset
+import neptune.new as neptune
+from os import path, makedirs
+from zipfile import ZipFile
 
-def index(dataloader, model_path):
+
+def index(neptune_id):
+    dataloader, data_path = download_dataset()
+
+    print(f"Downloading bi-encoder from neptune project {args.bi_encoder_neptune_id}")
+    project = neptune.init(
+        project="noahjadallah/TREC-Covid",
+        api_token="eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiJlNzgwNzhlNy1iMDVlLTQwNWUtYWJlYS04NWMxNjA0YmQ3ODAifQ==",
+        run=neptune_id,
+        mode="read-only"
+    )
+    project["model/bi-encoder"].download()
+    project.stop()
+
+    with ZipFile('bi-encoder.zip', 'r') as zipObj:
+        zipObj.extractall()
+
+    model_path = "./output/bi-encoder"
+    
     corpus, queries_text, qrels = dataloader.load(split="test")
     model = models.SentenceBERT(model_path)
     faiss_search = FlatIPFaissSearch(model)
