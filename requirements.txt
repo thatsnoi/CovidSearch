@@ -3,8 +3,8 @@ sentence_transformers
 torch~=1.11.0
 wget~=3.2
 nltk~=3.7
-numpy~=1.22.3
-pandas~=1.4.2
+numpy
+pandas
 faiss-cpu
 tqdm~=4.64.0
 transformers~=4.18.0
