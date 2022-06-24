@@ -50,7 +50,7 @@ def bm25(dataloader, sample_size=None, data_path="./datasets/trec-covid"):
 
     # Index documents to Pyserini #####
     index_name = "beir/trec-covid"  # beir/scifact
-    # r = requests.get(docker_beir_pyserini + "/index/", params={"index_name": index_name})
+    r = requests.get(docker_beir_pyserini + "/index/", params={"index_name": index_name})
     print("Finished indexing")
 
     # Retrieve documents from Pyserini #####

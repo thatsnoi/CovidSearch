@@ -3,6 +3,7 @@ from beir.retrieval.evaluation import EvaluateRetrieval
 from beir.retrieval.search.dense import DenseRetrievalExactSearch as DRES
 from beir.reranking.models import CrossEncoder
 from beir.reranking import Rerank
+from os import path
 import random
 import logging
 import json
@@ -26,7 +27,12 @@ def test(dataloader, model_path, sample_size, score_function="dot", cross_encode
     retriever = EvaluateRetrieval(model, score_function=score_function)  # or "cos_sim"
 
     print('Results for "text" query')
-    results = retriever.retrieve(corpus, queries_text)
+    results = retriever.retrieve(corpus, queries_text) # {'1': {'ahjhbj': 0.052, 'xx': 0.03}, '2': ...}
+    # corpus[id].get('text')
+
+    with open('./results.json', 'w') as outfile:
+        json.dump(results, outfile)
+
 
     # Fuse rankings
     if fuse_with_bm25:
@@ -35,6 +41,8 @@ def test(dataloader, model_path, sample_size, score_function="dot", cross_encode
             results_bm25 = json.load(json_file)
         results = rrf([results, results_bm25])
         retriever.evaluate(qrels, results, [1, 5, 10, 20])
+        with open('./results_fused.json', 'w') as outfile:
+            json.dump(results, outfile)
 
     if cross_encoder:
         cross_encoder_model = CrossEncoder('cross-encoder/ms-marco-electra-base')
@@ -42,6 +50,8 @@ def test(dataloader, model_path, sample_size, score_function="dot", cross_encode
 
         # Rerank top-100 results retrieved by bi encoder model
         results = reranker.rerank(corpus, queries_text, results, top_k=cross_encoder_top_k)
+        with open('./results_ce.json', 'w') as outfile:
+            json.dump(results, outfile)
 
     # Evaluate your model with NDCG@k, MAP@K, Recall@K and Precision@K  where k = [1,5,10,20]
     ndcg, _map, recall, precision = retriever.evaluate(qrels, results, [1, 5, 10, 20])

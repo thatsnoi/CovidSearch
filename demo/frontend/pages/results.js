@@ -1,16 +1,34 @@
 import SearchInput from '../components/Search/SearchInput'
 import { FiGithub } from 'react-icons/fi'
 import Result from '../components/Results/Result'
+import axios from 'axios'
+import { useState } from 'react'
 
 export default function Results() {
+  const [results, setResults] = useState([])
+  const [error, setError] = useState(false)
+
+  async function search(query) {
+    console.log(query)
+    try {
+      const res = await axios.post('http://127.0.0.1:8000/search', {
+        query: query,
+      })
+      console.log(res)
+      setResults(res.data)
+    } catch (error) {
+      setError(true)
+    }
+  }
+
   return (
-    <div className="flex flex-col relative h-screen">
+    <div className="flex flex-col relative h-screen overflow-hidden">
       <div className="flex justify-between items-center p-4 bg-indigo-900 h-20 w-full">
         <div className="w-2/3 flex items-center space-x-10">
           <h1 className="text-white font-sans text-3xl font-semibold">
             Covid<span className=" text-indigo-200">Search</span>
           </h1>
-          <SearchInput />
+          <SearchInput search={search} />
         </div>
         <FiGithub className="text-white text-2xl cursor-pointer" />
       </div>
@@ -50,10 +68,12 @@ export default function Results() {
             </div>
           </div>
         </div>
-        <div className="px-10 py-5 space-y-5">
-          <Result />
-          <Result />
-          <Result />
+        <div className="px-10 py-5 space-y-5 overflow-y-scroll">
+          {results.map((result) => {
+            return (
+              <Result key={result.id} title={result.title} text={result.text} />
+            )
+          })}
         </div>
       </div>
     </div>
