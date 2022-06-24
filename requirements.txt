@@ -13,4 +13,4 @@ tensorflow_text==2.8.2
 neptune-client
 fastapi~=0.78.0
 requests~=2.27.1
-scikit-learn~=1.1.0
+scikit-learn
