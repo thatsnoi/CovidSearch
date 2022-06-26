@@ -27,7 +27,7 @@ def index(neptune_id="TREC-66", model_path="./output/biobert-GenQ-bi-encoder-Gen
     model = models.SentenceBERT(model_path)
     faiss_search = FlatIPFaissSearch(model)
 
-    faiss_search.index(corpus)
+    faiss_search.index(corpus, score_function="cos_sim")
 
     output_dir = "./faiss-index"
     os.makedirs(output_dir, exist_ok=True)
