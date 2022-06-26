@@ -29,19 +29,22 @@ app.add_middleware(
 
 class Data(BaseModel):
     query: str
+    ce: bool
+    top_k: int
+    fuse: bool
 
 
 @app.post("/search")
 def search(data: Data):
     query = data.query
 
-    cross_encoder_k = 20
+    cross_encoder_k = data.top_k
 
     print("Retrieving similar docs")
     results = faiss_search.search(corpus, {'1': query}, 100, "dot")
 
     print("Applying cross-encoder")
-    if cross_encoder_k > 0:
+    if data.ce and cross_encoder_k > 0:
         # Rerank top-100 results retrieved by bi encoder model
         results = reranker.rerank(corpus, {'1': query}, results, top_k=cross_encoder_k)
 

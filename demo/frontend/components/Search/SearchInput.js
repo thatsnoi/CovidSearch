@@ -1,12 +1,16 @@
 import { FiSearch } from 'react-icons/fi'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
-export default function SearchInput({ search }) {
+export default function SearchInput({ search, value }) {
   const [query, setQuery] = useState('')
 
   const handleChange = (event) => {
     setQuery(event.target.value)
   }
+
+  useEffect(() => {
+    setQuery(value)
+  }, [value])
 
   return (
     <form
@@ -21,10 +25,11 @@ export default function SearchInput({ search }) {
          bg-white rounded-full border-2 border-indigo-300 px-4 flex items-center pr-10"
         placeholder="Type to Search..."
         onChange={handleChange}
+        value={query}
       ></input>
       <div className="absolute flex items-center top-0 bottom-0 right-5 cursor-pointer">
         <button type="submit">
-          <FiSearch />
+          <FiSearch size={22} />
         </button>
       </div>
     </form>
