@@ -16,7 +16,8 @@ export default function Results() {
     if (routerQuery != undefined && routerQuery.length > 0) {
       search(routerQuery)
     }
-  }, [routerQuery, search])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [routerQuery])
 
   const [results, setResults] = useState([])
   const [settings, setSettings] = useState({
@@ -27,10 +28,15 @@ export default function Results() {
   const [error, setError] = useState(false)
   const [loading, setLoading] = useState(false)
 
+  const _search = (query) => {
+    router.push('results?query=' + query)
+  }
+
   async function search(query) {
     setLoading(true)
+    setError(false)
     try {
-      const res = await axios.post('http://127.0.0.1:8000/search', {
+      const res = await axios.post('http://95.217.8.202:80/search', {
         query: query,
         ...settings,
       })
@@ -56,28 +62,28 @@ export default function Results() {
               Covid<span className="text-indigo-200">Search</span>
             </h1>
           </Link>
-          <SearchInput search={search} value={routerQuery} />
+          <SearchInput search={_search} value={routerQuery} />
         </div>
-        <FiGithub className="text-white text-2xl cursor-pointer" />
+        <a
+          href="https://github.com/thatsnoi/Final-Project-UB"
+          target="_blank"
+          rel="noreferrer"
+        >
+          <FiGithub className="text-white text-2xl cursor-pointer" />
+        </a>
       </div>
       <div className="flex h-full">
         <div className="h-full bg-gray-200 p-5 whitespace-nowrap">
           <h2 className="text-2xl font-semibold pb-5">Settings</h2>
           <Settings updateSettings={updateSettings} />
         </div>
-        <div className="px-10 py-5 space-y-5 overflow-y-scroll">
+        <div className="px-10 py-5 space-y-5 overflow-y-scroll mb-20">
           {loading
             ? 'Loading...'
             : error
             ? 'An error has occured.'
             : results.map((result) => {
-                return (
-                  <Result
-                    key={result.id}
-                    title={result.title}
-                    text={result.text}
-                  />
-                )
+                return <Result key={result.id} data={result} />
               })}
         </div>
       </div>

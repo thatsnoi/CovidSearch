@@ -16,3 +16,7 @@ realted work/
 demo/api/bi-encoder/
 
 demo/api/bi-encoder.zip
+
+demo/api/faiss-index/my-index.default.tsv
+
+demo/api/faiss-index/my-index.default.faiss

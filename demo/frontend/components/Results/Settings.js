@@ -39,7 +39,7 @@ export default function Settings({ updateSettings }) {
               checked={settings.ce}
               onChange={handleChangeRadioButton}
             />
-            <label className="pl-2" htmlFor="cdTrue">
+            <label className="pl-2" htmlFor="ceTrue">
               True
             </label>
           </div>

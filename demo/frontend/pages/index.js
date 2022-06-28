@@ -15,7 +15,14 @@ export default function Home() {
       className="flex relative justify-center items-center bg-indigo-900"
       style={{ height: '50vh' }}
     >
-      <FiGithub className="absolute top-4 right-4 text-white text-2xl cursor-pointer" />
+      <a
+        href="https://github.com/thatsnoi/Final-Project-UB"
+        target="_blank"
+        rel="noreferrer"
+      >
+        <FiGithub className="absolute top-4 right-4 text-white text-2xl cursor-pointer" />
+      </a>
+
       <div className="flex flex-col items-center space-y-5 w-1/2">
         <Link href="/">
           <h1 className="text-white font-sans text-5xl font-semibold cursor-pointer">
