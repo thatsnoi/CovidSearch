@@ -1,5 +1,4 @@
-# Information Retrieval for Covid-19
-Research Papers using Sentence-BERT
+# Information Retrieval for Covid-19 Research Papers using Sentence-BERT
 
 ## Abstract
 
