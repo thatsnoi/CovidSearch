@@ -36,10 +36,13 @@ export default function Results() {
     setLoading(true)
     setError(false)
     try {
-      const res = await axios.post('http://95.217.8.202:80/search', {
-        query: query,
-        ...settings,
-      })
+      const res = await axios.post(
+        'https://api.covidsearch.noahjadallah.com/search',
+        {
+          query: query,
+          ...settings,
+        }
+      )
       console.log(res)
       setResults(res.data)
       setLoading(false)
