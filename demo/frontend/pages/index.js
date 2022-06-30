@@ -16,7 +16,7 @@ export default function Home() {
       style={{ height: '50vh' }}
     >
       <a
-        href="https://github.com/thatsnoi/Final-Project-UB"
+        href="https://github.com/thatsnoi/CovidSearch"
         target="_blank"
         rel="noreferrer"
       >
