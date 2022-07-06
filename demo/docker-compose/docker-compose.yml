@@ -31,6 +31,10 @@ services:
       # Use the public network created to be shared between Traefik and
       # any other service that needs to be publicly available with HTTPS
       - traefik-public
+  bm25:
+    image: beir/pyserini-fastapi
+    ports:
+      - "8000:8000"
 
 networks:
   traefik-public:

@@ -40,7 +40,7 @@ def load_faiss():
 
 
 def index_bm25(dataloader, sample_size=None, data_path="./datasets/trec-covid",
-               docker_beir_pyserini="http://127.0.0.1:8000"):
+               docker_beir_pyserini="http://bm25:8000"):
     corpus, queries, qrels = dataloader.load(split="test")
 
     if sample_size is not None:
@@ -66,7 +66,7 @@ def index_bm25(dataloader, sample_size=None, data_path="./datasets/trec-covid",
     print("Finished indexing")
 
 
-def get_results_bm25(query, docker_beir_pyserini="http://127.0.0.1:8000"):
+def get_results_bm25(query, docker_beir_pyserini="http://bm25:8000"):
     # Retrieve documents from Pyserini #####
     payload = {"queries": [query], "qids": ["1"], "k": 100}
 
@@ -74,3 +74,25 @@ def get_results_bm25(query, docker_beir_pyserini="http://127.0.0.1:8000"):
     results = json.loads(requests.post(docker_beir_pyserini + "/lexical/batch_search/", json=payload).text)["results"]
 
     return results
+
+
+def rrf(all_rankings, k=60):
+    for rankings_per_topic in all_rankings:
+        for topic in rankings_per_topic:
+            sorted_rankings = sorted(rankings_per_topic[topic].items(), key=lambda x: -x[1])
+            sorted_rankings = [(x[0], idx + 1) for idx, x in enumerate(sorted_rankings)]
+            rankings_per_topic[topic] = dict(sorted_rankings)
+
+    fused_rankings = {}
+
+    for index, rankings_per_topic in enumerate(all_rankings):
+        for topic in rankings_per_topic:
+            if topic not in fused_rankings:
+                fused_rankings[topic] = {}
+            for doc in rankings_per_topic[topic]:
+                if doc not in fused_rankings[topic]:
+                    fused_rankings[topic][doc] = 0
+                fused_rankings[topic][doc] = fused_rankings[topic][doc] + (
+                        1 / (k + rankings_per_topic[topic][doc]))
+
+    return fused_rankings
