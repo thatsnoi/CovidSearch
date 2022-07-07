@@ -17,7 +17,7 @@ export default function Results() {
       search(routerQuery)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [routerQuery])
+  }, [])
 
   const [results, setResults] = useState([])
   const [settings, setSettings] = useState({
@@ -30,6 +30,9 @@ export default function Results() {
 
   const _search = (query) => {
     router.push('results?query=' + query)
+    if (query != undefined && query.length > 0) {
+      search(routerQuery)
+    }
   }
 
   async function search(query) {

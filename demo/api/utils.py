@@ -40,7 +40,7 @@ def load_faiss():
 
 
 def index_bm25(dataloader, sample_size=None, data_path="./datasets/trec-covid",
-               docker_beir_pyserini="http://bm25:8000"):
+               docker_beir_pyserini="http://api.covidsearch.noahjadallah.com:8000"):
     corpus, queries, qrels = dataloader.load(split="test")
 
     if sample_size is not None:
@@ -56,7 +56,7 @@ def index_bm25(dataloader, sample_size=None, data_path="./datasets/trec-covid",
             json.dump(data, fOut)
             fOut.write('\n')
 
-    # Upload Multipart-encoded files
+    # Upload Multipart-encoded files1
     with open(os.path.join(data_path, "pyserini.jsonl"), "rb") as fIn:
         r = requests.post(docker_beir_pyserini + "/upload/", files={"file": fIn}, verify=False)
 
@@ -66,7 +66,7 @@ def index_bm25(dataloader, sample_size=None, data_path="./datasets/trec-covid",
     print("Finished indexing")
 
 
-def get_results_bm25(query, docker_beir_pyserini="http://bm25:8000"):
+def get_results_bm25(query, docker_beir_pyserini="http://api.covidsearch.noahjadallah.com:8000"):
     # Retrieve documents from Pyserini #####
     payload = {"queries": [query], "qids": ["1"], "k": 100}
 
